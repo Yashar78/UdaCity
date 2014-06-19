@@ -8,6 +8,7 @@ When you click the **Knit HTML** button a web page will be generated that includ
 ```{r}
 library(ggplot2)
 library(stats)
+library(knitr)
 dim(diamonds)
 
 #show the list of types for each column
@@ -31,10 +32,18 @@ sum(diamonds$price < 250)
 sum(diamonds$price >= 15000)
 
 
+#cheaper diamonds
+ggplot(aes(x = price), data=diamonds)+
+  geom_histogram(color='black', fill='#0990D9', binwidth=5)+
+  scale_x_continuous(limits=c(400,1100))
 
 
-
-
+#price by cut hist
+ggplot(aes(x = price), data=diamonds, )+
+  geom_histogram(color='black', fill='#0990D9', binwidth=250)+
+  scale_x_continuous(limits=c(300,18825))+
+  # facet_wrap(~cut, nrow=5)
+ facet_grid(~cut)
 
 ```
 
