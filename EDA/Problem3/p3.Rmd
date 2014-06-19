@@ -1,0 +1,46 @@
+Title
+========================================================
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring web pages (click the **MD** toolbar button for help on Markdown).
+
+When you click the **Knit HTML** button a web page will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+library(ggplot2)
+library(stats)
+dim(diamonds)
+
+#show the list of types for each column
+lapply(diamonds,class)
+
+#what color represents the best diamonds based on price 
+qplot(x = color, y=price, data =subset(diamonds, !is.na(color)),
+      geom = 'boxplot')+scale_y_continuous(lim=c(300,10000))
+
+#price histogram 
+ ph <- ggplot(aes(x = price), data=diamonds)+
+  geom_histogram(color='black', fill='#0990D9', binwidth=250)+
+  scale_x_continuous(limits=c(300,18825))
+ph
+
+summary(diamonds$price)
+
+## Diamond counts
+sum(diamonds$price < 500)
+sum(diamonds$price < 250)
+sum(diamonds$price >= 15000)
+
+
+
+
+
+
+
+```
+
+You can also embed plots, for example:
+
+```{r fig.width=7, fig.height=6}
+plot(cars)
+```
+
