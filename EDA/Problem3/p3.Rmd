@@ -45,11 +45,58 @@ ggplot(aes(x = price), data=diamonds, )+
   # facet_wrap(~cut, nrow=5)
  facet_grid(~cut)
 
+
+#price by cut 
+by(diamonds$price, diamonds$cut, max)
+tapply(diamonds$price, diamonds$cut, max)
+tapply(diamonds$price, diamonds$cut, min)
+
+#How to find min
+m <- tapply(diamonds$price, diamonds$cut, median)
+m[m==min(m)]
+
+#Scales and Multiple Histograms
+ggplot(aes(x = price), data=diamonds, )+
+  geom_histogram(color='black', fill='#0990D9', binwidth=250)+
+  scale_x_continuous(limits=c(300,18825))+
+  facet_wrap(~cut, nrow=5,scales="free_y")+
+      theme(strip.text.x = element_text(size=8, angle=0),
+          strip.text.y = element_text(size=12, face="bold"),
+          strip.background = element_rect(colour="red", fill="#CCCCFF"))
+
+
+#Price per Carat by Cut
+ggplot(aes(x = price/carat), data=diamonds, )+
+  geom_histogram(color='black', fill='#0990D9', binwidth=250)+
+  scale_x_continuous(limits=c(300,18825))+
+  #scale_x_log10()+
+  facet_wrap(~cut, nrow=5,scales="free_y")
+
+# Price Box Plots
+ggplot(data=diamonds, aes(factor(color), price))+
+  geom_boxplot(notch= T,  outlier.colour = "#0990D9", outlier.size = 3,aes(fill = color))+
+  facet_wrap(~color, nrow=7,scales="free_y")
+
+tapply(diamonds$price, diamonds$color, summary)
+tapply(diamonds$price, diamonds$color, IQR)
+
+
+# Price per Carat Box Plots by Color
+ggplot(data=diamonds, aes(factor(color), price/carat))+
+  geom_boxplot(notch= T,  outlier.colour = "#0990D9", outlier.size = 3,aes(fill = color))
+
+# Carat Frequency Polygon
+ggplot(aes(x = carat), data = diamonds) +
+  geom_freqpoly(binwidth=0.005)+
+  scale_x_continuous(limits = c(0, 5.01), breaks = seq(0, 5.01, 0.1)) 
+
+subset(diamonds, diamonds$carat < 2)
+
 ```
 
 You can also embed plots, for example:
 
 ```{r fig.width=7, fig.height=6}
-plot(cars)
+
 ```
 

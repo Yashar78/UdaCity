@@ -1,0 +1,55 @@
+Exploratory Data Analysis 
+========================================================
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring web pages (click the **MD** toolbar button for help on Markdown).
+
+When you click the **Knit HTML** button a web page will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+setwd('/home/rahim/DelGitGub/UdaCity/EDA/Lesson3');
+library(ggplot2)
+pf <- read.csv('pseudo_facebook.tsv', sep='\t')
+qplot(x = age, y = friend_count, data = pf);
+
+ggplot(aes(x = age, y = friend_count), data = subset(pf, friend_count > 0  ))+ 
+  #geom_point(alpha = 1/20 )+ 
+  geom_jitter(alpha = 1/20 )+ 
+  xlim(13,99)+
+  coord_trans(y = "sqrt")
+
+ggplot(aes(x = age, y = friendships_initiated), data = pf)+ 
+  geom_jitter(alpha = 1/10, position = position_jitter(h = 0 ) )+ 
+  xlim(13,99)+ 
+  coord_trans(y = "sqrt") 
+
+
+#consitional means 
+library('dplyr')
+age_groups <- group_by(pf,age)
+pf.fc_by_age <- summarise(age_groups, 
+                           friend_count_mean = mean(friend_count), 
+                           frined_count_median = median(friend_count), 
+                           n = n())
+
+#same code as above but using pipe
+age_groups <- group_by(pf,age)
+pf.fc_by_age <-  pf %.%
+                 group_by(age) %.%
+                 summarise(friend_count_mean = mean(friend_count), 
+                           frined_count_median = median(friend_count), 
+                           n = n()) %.%
+                arrange(age)
+
+
+head(pf.fc_by_age)
+#pf.fc_by_age <- arrange(pf.fc_by_age, age)
+
+
+```
+
+You can also embed plots, for example:
+
+```{r fig.width=7, fig.height=6}
+plot(cars)
+```
+
