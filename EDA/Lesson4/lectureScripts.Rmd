@@ -30,7 +30,7 @@ pf.fc_by_age <- summarise(age_groups,
                            friend_count_mean = mean(friend_count), 
                            frined_count_median = median(friend_count), 
                            n = n())
-
+pf.fc_by_age <- arrange(pf.fc_by_age, age) 
 #same code as above but using pipe
 age_groups <- group_by(pf,age)
 pf.fc_by_age <-  pf %.%
@@ -41,8 +41,81 @@ pf.fc_by_age <-  pf %.%
                 arrange(age)
 
 
+
 head(pf.fc_by_age)
-#pf.fc_by_age <- arrange(pf.fc_by_age, age)
+#######
+#Conditional means 
+
+ggplot(aes(x = age, y = friend_count_mean), data = pf.fc_by_age)+ 
+  geom_point()+ geom_line()
+  xlim(13,99)
+######
+#Overylaying summaries with row data 
+ggplot(aes(x = age, y = friend_count), data = pf)+ 
+  geom_point(alpha = 0.05, position = position_jitter(h = 0 ) , color='orange', 
+              xlim=c(13,36), ylim=c(0,1000))+ 
+  #xlim(13,36)+ ylim(0,1000))+ 
+  #coord_cartesian(xlim = c(13,36), ylim = c(0,1000))+ 
+ # coord_trans(y = "sqrt") +
+  geom_line(stat='summary', fun.y=mean)+
+  geom_line(stat='summary', fun.y = quantile, probs= 0.1, linetype =2 , color='blue')+
+  geom_line(stat='summary', fun.y = quantile, probs= 0.5, linetype =2 , color='red')
+
+#####
+#Correlation
+cor.test(pf$age, pf$friend_count, method="pearson")
+with(pf,cor.test(age, friend_count, method="pearson"))
+with(subset(pf, age <=70),cor.test(age, friend_count, method="pearson"))
+
+#####
+#create scatter plots 
+ggplot(aes(x = www_likes_received, y = likes_received), data = pf)+ 
+  geom_point(alpha = 0.05, color='orange')+ 
+  xlim(0,quantile(pf$www_likes_received, 0.95))+ 
+  ylim(0,quantile(pf$likes_received, 0.95))+ 
+  #coord_cartesian(xlim = c(0,50) , ylim=c(0,500))+ 
+  #coord_trans(y = "log10", x = "log10") +
+  geom_line(stat='summary', fun.y=mean)+
+  geom_line(stat='summary', fun.y = quantile, probs= 0.1, linetype =2 , color='blue')+
+  geom_line(stat='summary', fun.y = quantile, probs= 0.5, linetype =2 , color='red')+
+  geom_smooth(method='lm', color='red')
+
+with(pf, cor.test(www_likes_received, likes_received))
+
+# More Caution with Correlation
+install.packages('alr3')
+library(alr3)
+data(Mitchell)
+
+ggplot(aes(x = Month, y = Temp), data=Mitchell)+ 
+  geom_point()
+
+ggplot(aes(x = Month%%12+1, y = Temp), data=Mitchell)+ 
+  geom_point()+ scale_x_discrete(breaks = seq(1,12,1))+
+  geom_line(stat='summary', fun.y=mean, color='red')
+with(Mitchell, cor.test(Month, Temp))
+
+######
+#Understanding Noise: Age to Age Months
+pf$age_with_months <- pf$age+(12-pf$dob_month)/12
+
+######
+#Age with months means 
+suppressMessages(library('dplyr'))
+age_groups <- group_by(pf, age_with_months)
+pf.fc_by_age_months <- summarise(age_groups,
+  friend_count_mean = mean(friend_count),
+  friend_count_median = median(friend_count),
+  n = n())
+
+pf.fc_by_age_months <- arrange(pf.fc_by_age_months, age_with_months)
+head(pf.fc_by_age_months)
+
+#####
+#Noise in Conditional Means
+ggplot(aes(x = age_with_months, y = friend_count_mean), data = subset(pf.fc_by_age_months, age_with_months<71))+ 
+  #geom_point()+ 
+  geom_line(color='red')
 
 
 ```

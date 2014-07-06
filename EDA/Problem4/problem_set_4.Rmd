@@ -1,0 +1,95 @@
+Title
+========================================================
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring web pages (click the **MD** toolbar button for help on Markdown).
+
+When you click the **Knit HTML** button a web page will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+library(ggplot2)
+
+ggplot(aes(x=x, y=price), data=subset(diamonds, x > 0 ))+
+  geom_point()
+
+with(diamonds, cor.test(x,price))
+with(diamonds, cor.test(y,price))
+with(diamonds, cor.test(z,price))
+
+#######
+#price vs. depth 
+ggplot(aes(x=depth, y=price), data=diamonds)+
+  geom_point(alpha = 1/100, )+
+  scale_x_continuous(breaks=seq(min(diamonds$depth), max(diamonds$depth)),2.0)
+
+cor.test(diamonds$depth, diamonds$price)
+
+#######
+# price vs. carat
+ggplot(aes(x=carat, y=price), data=diamonds)+
+  geom_point(alpha = 1/100, )+
+  scale_x_continuous(breaks=seq(min(diamonds$carat), max(diamonds$carat)),2)
+
+######
+#price vs. volume 
+diamonds$volume <- diamonds$x * diamonds$y * diamonds$z;
+
+ggplot(aes(x=volume, y=price), data=diamonds)+
+  geom_point(alpha = 5/100)+
+  xlim(0,500)
+
+with(subset(diamonds, volume > 0 & volume < 800 ), cor.test(price, volume ))
+
+## useful link to smoothing 
+#http://www.ats.ucla.edu/stat/r/faq/smooths.htm
+#http://dept.stat.lsa.umich.edu/~kshedden/Courses/Stat401/Notes/401-bivariate-slides.pdf
+ggplot(aes(x=volume, y=price), data=subset(diamonds, volume > 0 & volume < 800 ))+
+  geom_point(alpha = 5/100)+
+  geom_smooth(method='lm', formula= y ~ x, size=1)+ geom_smooth()
+
+#  Mean Price by Clarity
+#detach("package:plyr", unload=TRUE) 
+library(dplyr)
+clarity_groups <- group_by(diamonds, clarity)
+
+diamondsByClarity <- summarise(clarity_groups,
+  mean_price = mean(price),
+  median_price = median(price),
+  min_price = min(price), 
+  max_price = max(price),                             
+  n = n())
+
+
+
+#######
+#Bar charts of mean price 
+data(diamonds)
+library(dplyr)
+
+diamonds_by_clarity <- group_by(diamonds, clarity)
+diamonds_mp_by_clarity <- summarise(diamonds_by_clarity, mean_price = mean(price))
+
+diamonds_by_color <- group_by(diamonds, color)
+diamonds_mp_by_color <- summarise(diamonds_by_color, mean_price = mean(price))
+
+p1<-ggplot(diamonds_mp_by_clarity,aes(x=factor(clarity),y=mean_price))+
+geom_bar(fill="white", colour="darkgreen",stat="identity")
+
+p2 <- ggplot(aes(x = factor(color), y = mean_price), data=diamonds_mp_by_color)+
+  geom_bar(fill="white", colour="darkred", stat="identity")
+
+
+library(gridExtra)
+grid.arrange(p1,p2, ncol=2)
+
+
+
+names(diamonds)
+
+```
+
+You can also embed plots, for example:
+
+```{r fig.width=7, fig.height=6}
+plot(cars)
+```
+
