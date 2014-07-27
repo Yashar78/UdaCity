@@ -1,0 +1,132 @@
+Title
+========================================================
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring web pages (click the **MD** toolbar button for help on Markdown).
+
+When you click the **Knit HTML** button a web page will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+setwd('/home/rahim/DelGitGub/UdaCity/EDA/Lesson4');
+library(ggplot2)
+pf <- read.csv('pseudo_facebook.tsv', sep='\t')
+
+ggplot(aes(x = gender, y=age),
+       data=subset(pf,!is.na(gender)))+geom_boxplot()+
+  stat_summary(fun.y = mean, geom='point', shape=4)
+
+#Third Qualitative Variable
+suppressMessages(library(dplyr))
+age_gender_groups <- group_by(subset(pf, !is.na(gender)), age, gender)
+pf.fc_by_age_gender <- summarise(age_gender_groups,
+  mean_friend_count = mean(friend_count),
+  median_friend_count = median(friend_count),
+  n = n())
+
+#Plotting Conditional Summaries
+ggplot(aes(x=age, y=median_friend_count), data=pf.fc_by_age_gender)+
+  geom_line(aes(color = gender))
+
+
+#Reshaping Data
+#install.packages('reshape2')
+library(reshape2)
+
+pf.fc_by_age_gender.wide <- dcast(pf.fc_by_age_gender,
+                                  age ~ gender, 
+                                  value.var = 'median_friend_count')
+#Ratio Plot
+
+ggplot(aes(y= female/male, x=age), data = pf.fc_by_age_gender.wide)+
+  geom_point()+
+  geom_hline(aes(yintercept=1), colour='red', linetype=2)
+
+#Third Quantitative Variable
+
+pf$year_joined <- 2014-(ceiling((pf$tenure / 365)))
+
+#cut a variable 
+pf.year_joined.bucket <- cut(pf$year_joined, breaks = c(2004,2009,2011,2012,2014), right=T)
+
+
+table(pf.b)
+
+#puttin it all togethe r
+
+
+ggplot(aes(x=age, y=friend_count), data= pf)+
+    geom_line(aes(color=pf.year_joined.bucket), 
+              stat='summary', 
+              fun.y = median)
+
+#Plot the Grand Mean
+ggplot(aes(x=age, y=friend_count), data= pf)+
+  geom_line(aes(color=pf.year_joined.bucket), 
+              stat='summary', 
+              fun.y = mean)+
+  geom_line(stat='summary', fun.y = mean, linetype=2)
+
+
+#FRIENDING RATE
+with(subset(pf, pf$tenure>0), summary(friend_count / tenure))
+
+#Friendships Initiated
+pf.year_joined.bucket <- cut(subset(pf, tenure>0)$year_joined, breaks = c(2004,2009,2011,2012,2014), right=T)
+ggplot(aes(x=tenure, y=friendships_initiated/tenure), data= subset(pf, tenure >0))+
+    geom_line(aes(color=pf.year_joined.bucket), 
+              stat='summary', 
+              fun.y = median)
+
+
+#Bias  Variace Tradeoff
+ggplot(aes(x = 7 * round(tenure / 7), y = friendships_initiated / tenure),
+       data = subset(pf, tenure > 0)) +
+  geom_line(aes(color = pf.year_joined.bucket),
+            stat = "summary",
+            fun.y = mean)
+
+ggplot(aes(x = 7 * round(tenure / 7), y = friendships_initiated / tenure),
+       data = subset(pf, tenure > 0)) +
+  geom_smooth(aes(color = pf.year_joined.bucket))
+
+
+#Histograms Revisited
+
+setwd('/home/rahim/DelGitGub/UdaCity/EDA/Lesson5')
+yo <- read.csv('yogurt.csv')
+yo$id <- factor(yo$id)
+str(yo)
+
+ggplot(aes(x=price), data=yo)+
+  geom_histogram(binwidth=10)
+
+yo <- transform(yo, all.purchases = strawberry+blueberry+pina.colada+plain+mixed.berry)
+summary(yo$all.purchases)
+
+#prices over time 
+ggplot(aes(x=time , y=price/all.purchases), data=yo )+
+  geom_jitter(alpha=1/4, shape=21, fill=I('#F79420'))+
+  geom_line()
+
+#Looking at Samples of Households
+set.seed(2220)
+sample.ids <- sample(levels(yo$id), 16)
+
+ggplot(aes(x = time, y = price), data=subset(yo, id %in% sample.ids))+
+  facet_wrap(~id)+
+  geom_line()+
+  geom_point(aes(size=all.purchases), pch=1)
+
+#Scatterplot Matrices
+
+#installed.packages(GGally)
+library(GGally)
+theme_set(theme_minimal(20))
+
+set.seed(1836)
+pf_subset <- pf[,c(2:15)]
+names(pf_subset)
+ggpairs(pf_subset[sample.int(nrow(pf_subset),1000),])
+```
+
+
+
